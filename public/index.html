@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>URL Shortener</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>URL Shortener</h1>
+        <form id="shorten-form">
+            <div>
+                <label for="url">Enter URL:</label>
+                <input type="url" name="url" id="url" required>
+            </div>
+
+            <div>
+                <label for="shortCode">Enter shortCode:</label>
+                <input type="text" name="shortCode" id="shortCode" required>
+            </div>
+            <button type="submit">Shorten</button>
+        </form>
+
+        <h2>Shortened URL</h2>
+        <ul id="shortened-Urls"></ul>
+    </div>
+
+    <script>
+        const displayShortenedURL = (url, shortCode) => {
+            const urlsList = document.getElementById('shortened-Urls');
+            urlsList.innerHTML = '';  // Clear the list before adding new content
+
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `<a href="${url}" target="_blank">${shortCode}: ${url}</a>`;
+            urlsList.appendChild(listItem);
+        };
+
+        document.getElementById('shorten-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formdata = new FormData(event.target);
+            const url = formdata.get('url');
+            const shortCode = formdata.get('shortCode');
+            console.log(url, shortCode);
+
+            try {
+                const response = await fetch("/shorten", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url, shortCode })
+                });
+
+                if (response.ok) {
+                    const responseData = await response.json();
+                    displayShortenedURL(url, responseData.shortCode);
+                    alert("Form submitted successfully.");
+                    event.target.reset();
+                } else {
+                    const errorMessage = await response.text();
+                    alert(errorMessage);
+                }
+            } catch (error) {
+                console.log(error);
+                alert("An error occurred while submitting the form.");
+            }
+        });
+    </script>
+
+</body>
+
+</html>
